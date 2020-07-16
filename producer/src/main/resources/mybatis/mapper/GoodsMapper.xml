@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xchl.springcloud.producer.mapper.GoodsMapper">
+
+    <!-- id 对应方法名   -->
+    <insert id="insert" parameterType="com.xchl.springcloud.model.Goods">
+        insert into goods (goods_code, goods_name, goods_type, update_time, remark) values (
+        #{goodsCode}, #{goodsName}, #{goodsType}, #{updateTime}, #{remark}
+        )
+    </insert>
+
+    <select id="getGoodsByName" resultType="com.xchl.springcloud.model.Goods">
+        select * from goods where name = #{goodsName}
+    </select>
+
+    <!-- 返回list, resultType指定list的泛型   -->
+    <select id="list" resultType="com.xchl.springcloud.model.Goods">
+        select * from goods
+    </select>
+
+</mapper>

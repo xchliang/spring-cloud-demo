@@ -1,0 +1,57 @@
+eureka:
+  server:
+    enable-self-preservation: false # eureka server 关闭自我保护机制，生产环境建议打开
+  client:
+    # 指示此实例是否应向 eureka server 注册其信息以供其他实例发现。
+    # 在某些情况下，您不希望您的实例被发现，而只希望发现其他实例
+    # eureka server不需要注册
+    registerWithEureka: false
+    # eureka server不使用提供者的服务，所以不需要拉取服务注册信息
+    fetchRegistry: false
+
+---
+spring:
+  profiles: peer1
+
+server:
+  port: 8761
+
+eureka:
+  instance:
+    hostname: peer1
+  client:
+    serviceUrl:
+      # 集群中指定其它eureka server，多个时用逗号分隔
+      #defaultZone: http://localhost:8762/eureka,http://localhost:8763/eureka
+      defaultZone: http://localhost:8762/eureka
+
+---
+spring:
+  profiles: peer2
+
+server:
+  port: 8762
+
+eureka:
+  instance:
+    hostname: peer2
+  client:
+    serviceUrl:
+      # 集群中指定其它eureka server，多个时用逗号分隔
+      #defaultZone: http://localhost:8761/eureka,http://localhost:8763/eureka
+      defaultZone: http://localhost:8761/eureka
+
+---
+spring:
+  profiles: peer3
+
+server:
+  port: 8763
+
+eureka:
+  instance:
+    hostname: peer3
+  client:
+    serviceUrl:
+      # 集群中指定其它eureka server，多个时用逗号分隔
+      defaultZone: http://localhost:8761/eureka,http://localhost:8762/eureka
