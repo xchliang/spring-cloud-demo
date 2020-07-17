@@ -43,6 +43,12 @@ mybatis:
   mapper-locations: classpath:mybatis/mapper/*.xml #mapper映射文件
   type-aliases-package: com.xchl.springcloud.model #实体类文件包路径
 
+# 在被监控服务中暴露端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
 ---
 spring:
   profiles: p1

@@ -15,7 +15,8 @@ name和value互为别名，用法相同
 contextId：指定bean的名字，比如同一微服务下提供的商品、用户服务就可以使用不同的contextId
 url属性一般用于调试程序，允许我们手动指定@FeignClient调用的地址。
 */
-@FeignClient(name="producer-A", contextId="goodsClientService")
+@FeignClient(name="producer-A", contextId="goodsClientService",
+        fallback = GoodsClientServiceFallback.class)
 public interface GoodsClientService {
 
     @RequestMapping("goods/insert")

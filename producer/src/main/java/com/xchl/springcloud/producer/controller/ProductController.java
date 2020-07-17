@@ -1,5 +1,6 @@
 package com.xchl.springcloud.producer.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.xchl.springcloud.model.Goods;
 import com.xchl.springcloud.producer.service.GoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,12 +38,22 @@ public class ProductController {
         return goodsService.list();
     }
 
+    //服务熔断，fallbackMethod指定方法出现异常时，将要调用的方法
+    // 处理方法的返回值和参数要一致
+    @HystrixCommand(fallbackMethod = "getFallback")
     @RequestMapping("goods/get/{goodsId}")
-    public Goods getGoods(HttpServletRequest request, @PathVariable Long goodsId) {
+    public Goods get(HttpServletRequest request, @PathVariable Long goodsId) {
         Goods goods = goodsService.getGoodsById(goodsId);
+        if(goods==null){
+            throw new RuntimeException("get方法查询ID="+goodsId+"为空");
+        }
         //附加端口号，方便查看使用哪个服务提供者
         goods.setGoodsName(goods.getGoodsName() + request.getLocalPort());
         return goods;
+    }
+    //get方法的服务熔断方法
+    public Goods getFallback(HttpServletRequest request, @PathVariable Long goodsId) {
+        return new Goods("ID="+goodsId+"查询结果为空！@HystrixCommand",1);
     }
 
     @RequestMapping("goods/name/{goodsName}")
