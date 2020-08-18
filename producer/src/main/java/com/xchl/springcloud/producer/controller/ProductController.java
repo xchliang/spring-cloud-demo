@@ -1,6 +1,7 @@
 package com.xchl.springcloud.producer.controller;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import com.xchl.springcloud.model.Goods;
 import com.xchl.springcloud.producer.service.GoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,18 +34,40 @@ public class ProductController {
         int insert = goodsService.insert(goods);
         return (insert > 0) + "";
     }
-
+    /*服务熔断，fallbackMethod指定方法出现异常时，将要调用的方法
+    处理方法的返回值和参数要一致
+    HystrixCommandProperties类中定义了各种属性
+    */
+    @HystrixCommand(commandProperties ={
+            @HystrixProperty(name="circuitBreaker.enabled",value="true"),
+            @HystrixProperty(name="circuitBreaker.requestVolumeThreshold",value="5"),
+            @HystrixProperty(name="circuitBreaker.sleepWindowInMilliseconds",value="5000"),
+            @HystrixProperty(name="circuitBreaker.errorThresholdPercentage",value="50")
+    } ,fallbackMethod = "listFallback")
     @RequestMapping("goods/list")
     public List<Goods> list(HttpServletRequest request) {
         return goodsService.list();
     }
+    public List<Goods> listFallback(HttpServletRequest request) {
+        ArrayList<Goods> goodsList = new ArrayList<>();
+        goodsList.add(new Goods("listFallback 请求失败！",1));
+        return goodsList;
+    }
 
-    //服务熔断，fallbackMethod指定方法出现异常时，将要调用的方法
-    // 处理方法的返回值和参数要一致
-    @HystrixCommand(fallbackMethod = "getFallback")
+    /*服务熔断，fallbackMethod指定方法出现异常时，将要调用的方法
+    处理方法的返回值和参数要一致
+    HystrixCommandProperties类中定义了各种属性
+    */
+    @HystrixCommand(commandProperties ={
+            @HystrixProperty(name="circuitBreaker.enabled",value="true"),
+            @HystrixProperty(name="circuitBreaker.requestVolumeThreshold",value="5"),
+            @HystrixProperty(name="circuitBreaker.sleepWindowInMilliseconds",value="5000"),
+            @HystrixProperty(name="circuitBreaker.errorThresholdPercentage",value="50")
+    } ,fallbackMethod = "getFallback")
     @RequestMapping("goods/get/{goodsId}")
     public Goods get(HttpServletRequest request, @PathVariable Long goodsId) {
         Goods goods = goodsService.getGoodsById(goodsId);
+        goods.getGoodsName();
         if(goods==null){
             throw new RuntimeException("get方法查询ID="+goodsId+"为空");
         }
@@ -59,7 +83,8 @@ public class ProductController {
     @RequestMapping("goods/name/{goodsName}")
     public Goods getGoodsByName(HttpServletRequest request, @PathVariable String goodsName) {
         Goods goods = goodsService.getGoodsByName(goodsName);
-        goods.setGoodsName(goods.getGoodsName() + request.getLocalPort());
+        if(goods!=null)
+            goods.setGoodsName(goods.getGoodsName() + request.getLocalPort());
         return goods;
     }
 

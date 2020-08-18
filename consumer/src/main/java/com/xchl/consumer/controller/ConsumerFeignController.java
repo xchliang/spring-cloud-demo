@@ -13,6 +13,7 @@ import java.util.List;
 
 @RestController
 public class ConsumerFeignController {
+    //使用feign调用服务
     @Autowired
     GoodsClientService goodsClientService;
 

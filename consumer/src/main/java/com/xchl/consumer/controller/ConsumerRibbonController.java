@@ -1,5 +1,10 @@
 package com.xchl.consumer.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+import com.xchl.consumer.serviceClient.GoodsRestService;
 import com.xchl.springcloud.model.Goods;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +24,11 @@ public class ConsumerRibbonController {
      */
     @Autowired
     private RestTemplate restTemplate;
+
+    //封装restTemplate调用接口方法，使用hystrix熔断
+    @Autowired
+    private GoodsRestService goodsRestService;
+
     static String URL_PREFIX = "http://producer-A";//product-A微服务应用名称spring.application.name
 
     @RequestMapping("consumer/goods/insert")
@@ -30,13 +40,23 @@ public class ConsumerRibbonController {
     public List<Goods> list() {
         return restTemplate.getForObject(URL_PREFIX + "/goods/list", List.class);
     }
+
     @RequestMapping("consumer/goods/get/{goodsId}")
     public Goods getGoods(@PathVariable Long goodsId) {
         return restTemplate.getForObject(URL_PREFIX + "/goods/get/" + goodsId, Goods.class);
     }
+
     @RequestMapping("consumer/goods/name/{goodsName}")
     public Goods getGoodsByName(HttpServletRequest request, @PathVariable String goodsName) {
-        return restTemplate.getForObject(URL_PREFIX + "/goods/name/"+goodsName, Goods.class);
+        System.out.println("获取商品。。。");
+        //封装接口，restTemplate调用服务接口
+        Goods goods = goodsRestService.getGoodsByName(goodsName);
+        try {
+            System.out.println("获取商品："+new ObjectMapper().writeValueAsString(goods));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return goods;
     }
 
 

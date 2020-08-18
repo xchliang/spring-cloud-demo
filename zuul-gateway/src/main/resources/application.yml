@@ -1,0 +1,31 @@
+server:
+  port: 8091
+
+spring:
+  application:
+    name: zuul-gateway-AA
+
+# EurekaClientConfigBean定义了各种客户端配置属性
+eureka:
+  client:
+    # 不需要注册eureka
+    register-with-eureka: false
+    # 启用从注册中心拉取服务列表的功能
+    fetch-registry: true
+    # 设置从注册中心拉取服务列表的间隔
+    registry-fetch-interval-seconds: 30
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka,http://localhost:8762/eureka
+
+# 路由配置，微服务
+zuul:
+  routes:
+    provider-producer: #路由名称，名字任意，唯一
+      path: /goods/** #访问路径前缀
+      serviceId: producer-A #微服务ID，自动从eureka注册中心找到
+      stripPrefix: false #代理转发时，是否去掉前缀
+    #provider-order: 多个微服务经过路由时，routes下配置多组，类似provider-producer
+
+
+
+

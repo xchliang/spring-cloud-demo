@@ -12,7 +12,7 @@
     </insert>
 
     <select id="getGoodsByName" resultType="com.xchl.springcloud.model.Goods">
-        select * from goods where name = #{goodsName}
+        select * from goods where goods_name = #{goodsName}
     </select>
 
     <!-- 返回list, resultType指定list的泛型   -->
